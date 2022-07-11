@@ -3,6 +3,9 @@ from flask_app.config.mysqlconnection import connectToMySQL
 from flask_app import flash
 import re # The regex module
 
+# Set alias for db
+database = 'private_wall'
+
 """
 Import other models files for access to classes.
 We import the file rather than the class to avoid circular import
@@ -30,20 +33,20 @@ class User:
     def create_user(cls, data):
         """Add new user to db"""
         query = "INSERT INTO users (first_name, last_name, email, password) VALUES (%(first_name)s, %(last_name)s, %(email)s, %(password)s);"
-        return connectToMySQL('login_and_registration').query_db(query,data)
+        return connectToMySQL(database).query_db(query,data)
     @classmethod
     def get_user_by_id(cls, data):
         """Get the user by id"""
         query = "SELECT * FROM users WHERE id = %(id)s;"
         # Returns list & we make an instance of the first index of that list
-        return cls(connectToMySQL('login_and_registration').query_db(query, data)[0])
+        return cls(connectToMySQL(database).query_db(query, data)[0])
 
     @classmethod
     def get_user_by_email(cls, data):
         """Get user by email"""
         query = "SELECT * FROM users WHERE email = %(email)s;"
         # Returns list & we make an instance of the first index of that list
-        result = connectToMySQL('login_and_registration').query_db(query, data)
+        result = connectToMySQL(database).query_db(query, data)
         # Check for a result
         if len(result) < 1:
             return False
@@ -69,7 +72,7 @@ class User:
             data = {
                 "email": user['email']
             }
-            email_result = connectToMySQL('login_and_registration').query_db(query, data)
+            email_result = connectToMySQL(database).query_db(query, data)
             # Check to see if the query returned an result with that email;
             # if yes return False
             if len(email_result) >= 1:
@@ -81,8 +84,9 @@ class User:
                 flash("Email is not valid!", "danger")
                 is_valid = False
                 return is_valid
-            if len(user['password']) < 3:
-                flash("The password must be at least 8 characters, and contain at least one each of the following: one upper, one lower, one digit and one special character.", "danger")
+            # test if passwords match
+            if not user['password'] == user['password2']:
+                flash("The password must be the same and at least 8 characters long, and contain at least one each of the following: one upper, one lower, one digit and one special character.", "danger")
                 is_valid = False
             if not re.match(password_pattern, user['password']):
                 flash("The password must be at least 8 characters, and contain at least one each of the following: one upper, one lower, one digit and one special character.", "danger")
