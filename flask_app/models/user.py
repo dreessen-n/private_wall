@@ -36,6 +36,7 @@ class User:
         """Add new user to db"""
         query = "INSERT INTO users (first_name, last_name, email, password) VALUES (%(first_name)s, %(last_name)s, %(email)s, %(password)s);"
         return connectToMySQL(cls.db).query_db(query,data)
+
     @classmethod
     def get_user_by_id(cls, data):
         """Get the user by id"""
@@ -54,6 +55,15 @@ class User:
             return False
         return cls(result[0])
 
+    @classmethod
+    def get_all_users(cls,data):
+        """Get all users"""
+        query = "SELECT * FROM users;"
+        results = connectToMySQL(cls.db).query_db(query,data)
+        all_users = []
+        for u in results:
+            all_users.append(cls(u))
+        return all_users
 
     @staticmethod
     def validate_registration(user):

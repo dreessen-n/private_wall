@@ -25,7 +25,18 @@
             <!-- Received messages section -->
             <div class="container_messages">
                 <h2>{{ session.first_name }} Messages for you</h2>
-                <a class="btn btn-warning" href="/logout" role="button">Logout</a>
+                <table class="table">
+                  <tbody>
+                    {% for m in user_messages %}
+                    <tr>
+                        <td>{{ user_messages.sender }} said </td>
+                        <td>{{ user_messages.message }}</td>
+                        <td><a class="btn btn-warning" href=f"/delete_message/{user_messages.id}" role="button">Delete</a></td>
+                    </tr>
+                    {% endfor %}
+                  </tbody>
+                </table>
+                
             </div>
             <!-- Send section -->
             <div class="container_messages">
