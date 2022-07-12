@@ -36,7 +36,7 @@ def regitster():
     if user_id:
         session['id'] = user_id
     # Redirect to the dashboard page
-    return redirect('/dashboard')
+    return redirect('/wall')
 
 @app.route('/dashboard')
 def dashboard():
@@ -73,7 +73,7 @@ def login():
     # If password match, we set the user_id into session
     session['id'] = user_in_db.id
     # Never render on a POST
-    return redirect('/dashboard')
+    return redirect('/wall')
 
 @app.route('/logout')
 def logout():
@@ -81,3 +81,20 @@ def logout():
     session.clear()
     return redirect('/')
 
+@app.route('/wall')
+def display_send_messages():
+    """Display page of received message ability to send messages"""
+    if 'id' not in session:
+        flash("Please register or login to continue", "danger")
+        return redirect('/')
+    # Create data set to query user based on id to get name to display
+    data = {
+        'id': session['id']
+    }
+    # Pass the data dict to create_user method in class
+    one_user = user.User.get_user_by_id(data)
+    if one_user:
+        session['email'] = one_user.email
+        session['first_name'] = one_user.first_name
+        session['last_name'] = one_user.last_name
+    return render_template('wall.html')

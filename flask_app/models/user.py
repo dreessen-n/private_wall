@@ -3,8 +3,6 @@ from flask_app.config.mysqlconnection import connectToMySQL
 from flask_app import flash
 import re # The regex module
 
-# Set alias for db
-database = 'private_wall'
 
 """
 Import other models files for access to classes.
@@ -19,6 +17,10 @@ EMAIL_REGEX = re.compile(r'^[a-zA-Z0-9.+_-]+@[a-zA-Z0-9._-]+\.[a-zA-Z]+$')
 password_pattern = "^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$%^&*-]).{8,}$"
 
 class User:
+    # Use a alias for the database; call in classmethods as cls.db
+    # For staticmethod need to call the database name not alias
+    db = "private_wall"
+
     def __init__(self, data):
         """Model a user"""
         self.id = data['id']
@@ -33,20 +35,20 @@ class User:
     def create_user(cls, data):
         """Add new user to db"""
         query = "INSERT INTO users (first_name, last_name, email, password) VALUES (%(first_name)s, %(last_name)s, %(email)s, %(password)s);"
-        return connectToMySQL(database).query_db(query,data)
+        return connectToMySQL(cls.db).query_db(query,data)
     @classmethod
     def get_user_by_id(cls, data):
         """Get the user by id"""
         query = "SELECT * FROM users WHERE id = %(id)s;"
         # Returns list & we make an instance of the first index of that list
-        return cls(connectToMySQL(database).query_db(query, data)[0])
+        return cls(connectToMySQL(cls.db).query_db(query, data)[0])
 
     @classmethod
     def get_user_by_email(cls, data):
         """Get user by email"""
         query = "SELECT * FROM users WHERE email = %(email)s;"
         # Returns list & we make an instance of the first index of that list
-        result = connectToMySQL(database).query_db(query, data)
+        result = connectToMySQL(cls.db).query_db(query, data)
         # Check for a result
         if len(result) < 1:
             return False
@@ -72,7 +74,7 @@ class User:
             data = {
                 "email": user['email']
             }
-            email_result = connectToMySQL(database).query_db(query, data)
+            email_result = connectToMySQL('private_wall').query_db(query, data)
             # Check to see if the query returned an result with that email;
             # if yes return False
             if len(email_result) >= 1:
